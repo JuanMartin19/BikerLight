@@ -1001,8 +1001,10 @@ app.use("/", adminRoutes);
   });
 
   // 🔹 Iniciar el servidor
-  const PORT = process.env.PORT || 5000;
-  console.log("🟢 Iniciando servidor en puerto:", PORT);
+  const PORT = process.env.PORT;
+  if (!PORT) {
+    throw new Error("❌ No se definió el puerto (process.env.PORT)");
+  }
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
-  });  
+  });
