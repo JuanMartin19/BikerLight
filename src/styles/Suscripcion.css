@@ -1,0 +1,45 @@
+.suscripcion-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+}
+
+.suscripcion-header {
+  text-align: center;
+}
+
+.suscripcion-logo {
+  height: 50px;
+}
+
+.suscripcion-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.suscripcion-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.suscripcion-tabla th,
+.suscripcion-tabla td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.pago-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}

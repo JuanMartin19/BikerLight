@@ -1,0 +1,204 @@
+.gestion-productos {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.07);
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .gestion-productos h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .gestion-productos form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .gestion-productos input[type="text"],
+  .gestion-productos input[type="number"],
+  .gestion-productos select,
+  .gestion-productos textarea,
+  .gestion-productos input[type="file"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+  }
+  
+  .gestion-productos textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .gestion-productos label {
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .preview {
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .preview img {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+  
+  .gestion-productos button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .gestion-productos button:hover {
+    background-color: #218838;
+  }
+  
+  .gestion-productos button[type="button"] {
+    background-color: #6c757d;
+  }
+  
+  .gestion-productos button[type="button"]:hover {
+    background-color: #5a6268;
+  }
+  
+  .volver-dashboard {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.2s;
+  }
+  
+  .volver-dashboard:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Tabla de productos */
+  .gestion-productos table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.95rem;
+  }
+  
+  .gestion-productos th,
+  .gestion-productos td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .gestion-productos th {
+    background-color: #f1f1f1;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .gestion-productos tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .gestion-productos img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .gestion-productos td button {
+    background-color: #ffc107;
+    color: #333;
+    padding: 6px 10px;
+    margin: 2px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .gestion-productos td button:hover {
+    opacity: 0.85;
+  }
+  
+  .gestion-productos td button:last-child {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    .gestion-productos form {
+      grid-template-columns: 1fr;
+    }
+  
+    .preview {
+      grid-column: span 1;
+      flex-direction: column;
+    }
+  
+    .gestion-productos td,
+    .gestion-productos th {
+      font-size: 0.85rem;
+      padding: 8px 6px;
+    }
+  }
+  
+.gestion-productos form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
+  gap: 20px;
+  margin-bottom: 30px;
+  align-items: end;
+}
+
+.gestion-productos input[type="text"],
+.gestion-productos input[type="number"],
+.gestion-productos select,
+.gestion-productos textarea,
+.gestion-productos input[type="file"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gestion-productos textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ✅ Para que 'Subir Imagen' ocupe toda la fila */
+.gestion-productos label[for="imagen"],
+.gestion-productos input[type="file"] {
+  grid-column: span 1;
+}
+
+/* ✅ Botones abajo centrados */
+.gestion-productos button[type="submit"],
+.gestion-productos button[type="button"] {
+  grid-column: span 3;
+  padding: 12px;
+  font-size: 16px;
+}

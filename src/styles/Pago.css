@@ -1,0 +1,49 @@
+.pago-container {
+    text-align: center;
+    padding: 20px;
+    background-color: #f4f4f4;
+  }
+  
+  .pago-resumen {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .pago-resumen h3 {
+    margin-bottom: 10px;
+  }
+  
+  .pago-button {
+    background-color: #28a745;
+    color: white;
+    padding: 15px;
+    width: 250px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+  }
+  
+  .pago-button:hover {
+    background-color: #218838;
+  }
+  
+  .volver-button {
+    background-color: #007bff;
+    color: white;
+    padding: 15px;
+    width: 250px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  .volver-button:hover {
+    background-color: #0056b3;
+  }
+  

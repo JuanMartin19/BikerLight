@@ -1,0 +1,91 @@
+.admin-dashboard {
+  background: #f8f9fa;
+  padding: 40px 20px;
+  min-height: 100vh;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.admin-dashboard h1 {
+  font-size: 2rem;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.subtitulo {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.admin-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.admin-buttons button {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  padding: 15px;
+  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.admin-buttons button:hover {
+  background-color: #138496;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 15px;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-top: 40px;
+  max-width: 400px;
+  width: 100%;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+}
+
+@media (max-width: 600px) {
+  .admin-buttons {
+    width: 100%;
+  }
+
+  .admin-buttons button,
+  .logout-btn {
+    font-size: 0.95rem;
+    padding: 12px;
+  }
+}
+
+.alerta-stock {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 6px;
+  font-weight: bold;
+}
+.alerta-stock ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+.alerta-stock li {
+  list-style-type: "⚠️ ";
+}
