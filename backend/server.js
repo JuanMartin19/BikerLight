@@ -33,15 +33,19 @@ app.use("/", adminRoutes);
 
   // 🔹 Conectar a MySQL con promesas
   const db = mysql.createPool({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      port: process.env.DB_PORT,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
   });
+  
+  db.getConnection()
+  .then(() => console.log("✅ Conectado a la base de datos MySQL"))
+  .catch((err) => console.error("❌ Error al conectar con MySQL:", err));
 
   // Middleware para servir archivos estáticos desde /uploads
   app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -993,7 +997,10 @@ app.use("/", adminRoutes);
   });
 
   // 🔹 Iniciar el servidor
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-      console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  });
+const PORT = process.env.PORT || 5000;
+
+console.log("🟢 Iniciando servidor en puerto:", PORT);
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+});
