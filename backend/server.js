@@ -48,8 +48,7 @@ app.use("/", adminRoutes);
   .then(() => {
     console.log("✅ Conectado a la base de datos");
 
-    // Solo arrancamos el servidor si la conexión es exitosa
-    const PORT = process.env.PORT || 3000; // fallback para desarrollo
+    const PORT = process.env.PORT || 3000;
     console.log("🛠️ Puerto asignado por Render:", PORT);
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
@@ -57,7 +56,6 @@ app.use("/", adminRoutes);
   })
   .catch((err) => {
     console.error("❌ Error al conectar con la base de datos:", err);
-    // Aquí no hacemos process.exit(1), solo mostramos el error
   });
 
   // Middleware para servir archivos estáticos desde /uploads
