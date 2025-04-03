@@ -43,9 +43,13 @@ app.use("/", adminRoutes);
     queueLimit: 0
   });
   
+  // 💡 Agregar esta prueba de conexión
   db.getConnection()
-  .then(() => console.log("✅ Conectado a la base de datos MySQL"))
-  .catch((err) => console.error("❌ Error al conectar con MySQL:", err));
+    .then(() => console.log("✅ Conectado a la base de datos"))
+    .catch((err) => {
+      console.error("❌ Error al conectar con la base de datos:", err);
+      process.exit(1); // Detiene el servidor si no conecta
+  });  
 
   // Middleware para servir archivos estáticos desde /uploads
   app.use("/uploads", express.static(path.join(__dirname, "uploads")));
