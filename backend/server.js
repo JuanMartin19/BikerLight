@@ -1006,13 +1006,3 @@ app.use("/", adminRoutes);
       res.status(500).json({ error: "Error del servidor al verificar la suscripción" });
     }
   });
-
-  // 🔹 Iniciar el servidor
-  const PORT = process.env.PORT;
-if (!PORT) {
-  throw new Error("❌ No se definió el puerto (process.env.PORT)");
-}
-console.log("🛠️ Puerto asignado por Render:", process.env.PORT);
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
-});
