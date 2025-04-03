@@ -45,11 +45,20 @@ app.use("/", adminRoutes);
   
   // 💡 Agregar esta prueba de conexión
   db.getConnection()
-    .then(() => console.log("✅ Conectado a la base de datos"))
-    .catch((err) => {
-      console.error("❌ Error al conectar con la base de datos:", err);
-      process.exit(1); // Detiene el servidor si no conecta
-  });  
+  .then(() => {
+    console.log("✅ Conectado a la base de datos");
+
+    // Solo arrancamos el servidor si la conexión es exitosa
+    const PORT = process.env.PORT || 3000; // fallback para desarrollo
+    console.log("🛠️ Puerto asignado por Render:", PORT);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Error al conectar con la base de datos:", err);
+    // Aquí no hacemos process.exit(1), solo mostramos el error
+  });
 
   // Middleware para servir archivos estáticos desde /uploads
   app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -1002,9 +1011,10 @@ app.use("/", adminRoutes);
 
   // 🔹 Iniciar el servidor
   const PORT = process.env.PORT;
-  if (!PORT) {
-    throw new Error("❌ No se definió el puerto (process.env.PORT)");
-  }
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
-  });
+if (!PORT) {
+  throw new Error("❌ No se definió el puerto (process.env.PORT)");
+}
+console.log("🛠️ Puerto asignado por Render:", process.env.PORT);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+});
