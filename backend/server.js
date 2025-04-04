@@ -46,14 +46,6 @@ function verifyToken(req, res, next) {
   });
 }
 
-// Sirve los archivos estáticos de la carpeta 'build' de React
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-// Ruta comodín para manejar todas las rutas no definidas
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build/index.html'));
-});
-
 // Prueba de conexión a la base de datos
 db.getConnection()
   .then(() => {
@@ -69,11 +61,6 @@ db.getConnection()
   });
 
 module.exports.verifyToken = verifyToken;
-
-// Ruta de prueba para verificar que el servidor está funcionando
-app.get("/", (req, res) => {
-  res.send("Servidor funcionando");
-});
 
 // 🔹 Importar rutas (ya funciona porque verifyToken ya está definido)
 const adminRoutes = require("./routes/admin");
