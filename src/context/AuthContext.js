@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import api from '../components/api';
+import api from '../components/api.js';
 
 const AuthContext = createContext();
 
@@ -32,7 +32,6 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     try {
       if (token) {
-        // Asegurarse de obtener la URL base del backend de manera dinámica
         await api.get("/logout", {
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -45,7 +44,7 @@ export const AuthProvider = ({ children }) => {
     }
     localStorage.clear();
     setUser(null);
-  };
+  };  
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>
