@@ -4,12 +4,12 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/AdminDashboard.css";
-import api from './api';
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [agotados, setAgotados] = useState([]);
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     if (!user || user.tipo_usuario !== 1) {
@@ -20,7 +20,8 @@ const AdminDashboard = () => {
     const token = localStorage.getItem("token");
 
     // Verificar productos con stock agotado
-    api.get("/admin/alertas-stock", {
+    fetch(`${apiUrl}/admin/alertas-stock`, {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
       },

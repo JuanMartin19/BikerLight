@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/GestionProductos.css";
 import Swal from "sweetalert2";
-import api from './api';
+import axios from "axios";  // Asegúrate de importar axios
 
 const GestionProductos = () => {
   const [productos, setProductos] = useState([]);
@@ -20,9 +20,12 @@ const GestionProductos = () => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
+  // Obtener la URL base de la API
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const fetchProductos = async () => {
     try {
-      const res = await api.get("/admin/productos", {
+      const res = await api.get(`${apiUrl}/admin/productos`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -51,8 +54,8 @@ const GestionProductos = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = modoEdicion
-      ? `http://localhost:5000/admin/productos/${formData.id_producto}`
-      : "http://localhost:5000/admin/productos";
+      ? `${apiUrl}/admin/productos/${formData.id_producto}`
+      : `${apiUrl}/admin/productos`;
     const method = modoEdicion ? "PUT" : "POST";
 
     try {
@@ -125,7 +128,7 @@ const GestionProductos = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/admin/productos/${id}`, {
+      const res = await fetch(`${apiUrl}/admin/productos/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -163,7 +166,7 @@ const GestionProductos = () => {
     formDataFile.append("imagen", file);
 
     try {
-      const res = await api.get("/admin/upload", {
+      const res = await api.get(`${apiUrl}/admin/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -247,7 +250,7 @@ const GestionProductos = () => {
 
         {formData.imagen && (
           <div className="preview">
-            <img src={`http://localhost:5000${formData.imagen}`} alt="preview" width="120" />
+            <img src={`${apiUrl}${formData.imagen}`} alt="preview" width="120" />
           </div>
         )}
 
@@ -285,7 +288,7 @@ const GestionProductos = () => {
               <td>
                 {p.imagen && (
                   <img
-                    src={`http://localhost:5000${p.imagen}`}
+                    src={`${apiUrl}${p.imagen}`}
                     alt={p.nombre}
                     width="70"
                   />

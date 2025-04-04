@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/GestionUsuarios.css";
 import Swal from "sweetalert2";
-import api from './api';
-
+import axios from "axios";
 
 const GestionClientes = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -16,9 +15,12 @@ const GestionClientes = () => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
+  // Obtener la URL base de la API
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const fetchUsuarios = async () => {
     try {
-      const res = await api.get("/admin/usuarios", {
+      const res = await api.get(`${apiUrl}/admin/usuarios`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -50,7 +52,7 @@ const GestionClientes = () => {
     if (!confirmacion.isConfirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/admin/usuarios/${id_usuario}`, {
+      const res = await fetch(`${apiUrl}/admin/usuarios/${id_usuario}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +89,7 @@ const GestionClientes = () => {
   const registrarAdmin = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.get("/admin/registrar", {
+      const res = await api.get(`${apiUrl}/admin/registrar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

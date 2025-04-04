@@ -7,7 +7,6 @@ import "../styles/Login.css";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import Swal from "sweetalert2";
-import api from './api';
 
 const logo = "/logoweb.jpg";
 
@@ -24,6 +23,9 @@ function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
 
+    // Definir la URL base desde la variable de entorno
+    const apiUrl = process.env.REACT_APP_API_URL;
+
     useEffect(() => {
         const closeOnEscape = (e) => {
             if (e.key === "Escape") setModal(false);
@@ -35,10 +37,13 @@ function Login() {
     const handleLogin = (e) => {
         e.preventDefault();
 
-        api.get("/login", {
+        // Reemplazar axios con fetch
+        fetch(`${apiUrl}/login`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ correo, contraseña }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ correo, contraseña })
         })
             .then((res) => res.json())
             .then((data) => {
@@ -86,15 +91,16 @@ function Login() {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.get("/register", {
+            const response = await fetch(`${apiUrl}/register`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData)
             });
-
             const data = await response.json();
 
-            if (response.ok) {
+            if (data.success) {
                 Swal.fire({
                     icon: "success",
                     title: "Registro exitoso",
@@ -131,15 +137,16 @@ function Login() {
             const decoded = jwtDecode(credentialResponse.credential);
             const { email, name } = decoded;
 
-            const res = await api.get("/auth/google", {
+            const res = await fetch(`${apiUrl}/auth/google`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({ email, name })
             });
-
             const data = await res.json();
 
-            if (!res.ok) {
+            if (!data.token) {
                 Swal.fire({
                     icon: "error",
                     title: "Error",
@@ -186,21 +193,22 @@ function Login() {
             const decoded = jwtDecode(credentialResponse.credential);
             const { email, name } = decoded;
 
-            const res = await api.get("/register/google", {
+            const res = await fetch(`${apiUrl}/register/google`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({ email, name })
             });
-
             const data = await res.json();
 
             Swal.fire({
-                icon: res.ok ? "success" : "error",
-                title: res.ok ? "Registro exitoso" : "Error",
+                icon: data.success ? "success" : "error",
+                title: data.success ? "Registro exitoso" : "Error",
                 text: data.message || data.error
             });
 
-            if (res.ok) {
+            if (data.success) {
                 setModal(false);
             }
 

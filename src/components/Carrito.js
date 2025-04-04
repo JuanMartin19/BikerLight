@@ -3,8 +3,6 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/Carrito.css";
-import api from './api';
-
 
 const logo = "/logoweb.jpg";
 
@@ -16,6 +14,8 @@ function Carrito() {
   const [compraExitosa, setCompraExitosa] = useState(false);
   const token = localStorage.getItem("token");
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     const session = JSON.parse(localStorage.getItem("userSession"));
     if (session?.userId) {
@@ -24,7 +24,8 @@ function Carrito() {
 
     if (!token) return;
 
-    api.get("/carrito", {
+    // Obtener carrito desde la API
+    fetch(`${apiUrl}/carrito`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -41,13 +42,13 @@ function Carrito() {
           text: "No se pudo cargar el carrito.",
         });
       });
-  }, []);
+  }, [token, apiUrl]);
 
   const actualizarCantidad = async (idProducto, nuevaCantidad) => {
     if (nuevaCantidad <= 0) return;
 
     try {
-      const res = await api.get("/carrito", {
+      const res = await fetch(`${apiUrl}/carrito`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -81,7 +82,7 @@ function Carrito() {
 
   const eliminarProducto = async (idProducto) => {
     try {
-      await fetch(`http://localhost:5000/carrito/${idProducto}`, {
+      await fetch(`${apiUrl}/carrito/${idProducto}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -127,13 +128,13 @@ function Carrito() {
     }
 
     try {
-      const response = await api.get("/procesar-pago", {
+      const response = await fetch(`${apiUrl}/procesar-pago`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ productos: carrito }),
+        body: JSON.stringify({ productos: carrito })
       });
 
       const data = await response.json();
@@ -195,7 +196,7 @@ function Carrito() {
           carrito.map((producto) => (
             <div key={producto.id} className="carrito-card">
               <img
-                src={`http://localhost:5000${producto.Imagen}`}
+                src={`${apiUrl}${producto.Imagen}`}
                 alt={producto.Modelo}
                 className="carrito-producto-imagen"
               />

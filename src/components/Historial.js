@@ -4,7 +4,7 @@ import Chart from "chart.js/auto";
 import Swal from "sweetalert2";
 import "../styles/Historial.css";
 import { AuthContext } from "../context/AuthContext";
-import api from './api';
+import axios from "axios";
 
 function Historial() {
   const [ventas, setVentas] = useState([]);
@@ -22,9 +22,12 @@ function Historial() {
 
   const token = localStorage.getItem("token");
 
+  // Obtener la URL base de la API
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const cargarVentas = async () => {
     try {
-      const res = await api.get("/historial-compras", {
+      const res = await api.get(`${apiUrl}/historial-compras`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -42,7 +45,7 @@ function Historial() {
 
   const cargarPerfil = async () => {
     try {
-      const res = await api.get("/perfil", {
+      const res = await api.get(`${apiUrl}/perfil`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -60,7 +63,7 @@ function Historial() {
 
   const generarGraficoIoT = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/reporte-iot`, {
+      const res = await fetch(`${apiUrl}/reporte-iot`, {
         headers: { Authorization: `Bearer ${token}` },
       });        
 
@@ -128,7 +131,7 @@ function Historial() {
     try {
       if (!perfil?.id_usuario) return;
   
-      const res = await fetch(`http://localhost:5000/reporte-iot`, {
+      const res = await fetch(`${apiUrl}/reporte-iot`, {
         headers: { Authorization: `Bearer ${token}` },
       });
   
@@ -199,7 +202,7 @@ function Historial() {
 
   const guardarCambios = async () => {
     try {
-      const res = await api.get("/perfil/actualizar", {
+      const res = await api.get(`${apiUrl}/perfil/actualizar`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -316,7 +319,7 @@ function Historial() {
                         <button className="btn-factura" onClick={() => irAFactura(venta)}>Facturar</button>
                       </td>
                     </tr>
-                ))}
+                ))} 
               </tbody>
             </table>
 
@@ -342,13 +345,12 @@ function Historial() {
 
         {!hayDatosIot && (
           <div className="mensaje-sin-grafico">
-            <p style={{ color: "#999", textAlign: "center", marginTop: "20px" }}>
+            <p style={{ color: "#999", textAlign: "center", marginTop: "20px" }} >
               🔌 Tu chaqueta aún no ha enviado datos.<br />
               Si ya tienes una, asegúrate de que esté conectada correctamente.<br />
               Si es tu primera vez aquí, visita el catálogo para adquirirla.
             </p>
-            <div style={{ textAlign: "center", marginTop: "10px" }}>
-            </div>
+            <div style={{ textAlign: "center", marginTop: "10px" }} />
           </div>
         )}
       </div>

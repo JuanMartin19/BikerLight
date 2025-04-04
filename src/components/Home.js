@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Home.css";
-import api from './api';
 
 const logo = "/logoweb.jpg";
 
@@ -21,11 +20,13 @@ function Home() {
   const [carrito, setCarrito] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   // ✅ Verificar estado de suscripción y mostrar alerta bonita con Swal
   useEffect(() => {
     const verificarSuscripcion = async () => {
       try {
-        const res = await api.get("/suscripcion-estado", {
+        const res = await api.get(`${apiUrl}/suscripcion-estado`, {
           headers: {
             Authorization: `Bearer ${user?.token}`,
             "Content-Type": "application/json",
@@ -91,7 +92,7 @@ function Home() {
       localStorage.setItem("userId", id);
     }
 
-    api.get("/chaquetas", {
+    api.get(`${apiUrl}/chaquetas`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${user.token}`,
@@ -133,7 +134,7 @@ function Home() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    api.get("/carrito", {
+    api.get(`${apiUrl}/carrito`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -158,7 +159,7 @@ function Home() {
   // ➕ Agregar producto al carrito
   const agregarAlCarrito = async (producto) => {
     try {
-      const response = await api.get("/carrito", {
+      const response = await api.get(`${apiUrl}/carrito`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${user?.token}`,
@@ -226,7 +227,7 @@ function Home() {
             chaquetas.map((chaqueta) => (
               <div key={chaqueta.id} className="product-card">
                 <img
-                  src={`http://localhost:5000${chaqueta.Imagen}`}
+                  src={`${apiUrl}${chaqueta.Imagen}`}
                   alt={chaqueta.Modelo}
                   className="product-image"
                 />

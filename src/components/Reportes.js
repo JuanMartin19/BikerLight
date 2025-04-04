@@ -4,7 +4,6 @@ import Chart from "chart.js/auto";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2";
-import api from './api';
 import "../styles/Reportes.css";
 
 const Reportes = () => {
@@ -15,9 +14,12 @@ const Reportes = () => {
   const [reporteSeleccionado, setReporteSeleccionado] = useState("");
   const intervalRef = useRef(null);
 
+  // Obtener la URL base de la API
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   const cargarReportes = async () => {
     try {
-      const res = await api.get("/admin/reportes-detallados", {
+      const res = await api.get(`${apiUrl}/admin/reportes-detallados`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -183,7 +185,7 @@ const Reportes = () => {
         destruirGrafico();
   
         try {
-          const res = await api.get("/admin/reporte-iot-unico");
+          const res = await api.get(`${apiUrl}/admin/reporte-iot-unico`);
           const data = await res.json();
   
           // ✅ Guardamos los datos para el PDF

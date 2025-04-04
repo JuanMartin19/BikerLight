@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/Pago.css";
-import api from './api';
-
 
 function Pago() {
   const navigate = useNavigate();
   const [carrito, setCarrito] = useState([]);
   const [metodoPago, setMetodoPago] = useState("");
+
+  // Obtener URL base desde las variables de entorno
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const carritoGuardado = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -26,11 +27,33 @@ function Pago() {
     }
 
     alert(`Procesando pago con ${metodoPago}...`);
-    setTimeout(() => {
-      alert("✅ Pago exitoso. Gracias por tu compra.");
-      localStorage.removeItem("carrito"); // Limpiar carrito después del pago
-      navigate("/home");
-    }, 2000);
+
+    // Llamada a la API para procesar el pago con fetch
+    fetch(`${apiUrl}/procesar-pago`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ productos: carrito, metodoPago }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        alert("✅ Pago exitoso. Gracias por tu compra.");
+        localStorage.removeItem("carrito"); // Limpiar carrito después del pago
+        navigate("/home");
+      })
+      .catch((err) => {
+        console.error("Error al procesar el pago:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo procesar el pago.",
+        });
+      });
   };
 
   return (

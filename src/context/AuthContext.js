@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import api from '../components/api.js';
 
 const AuthContext = createContext();
 
@@ -28,23 +27,10 @@ export const AuthProvider = ({ children }) => {
     setUser(sessionData);
   };
 
-  const logout = async () => {
-    const token = localStorage.getItem("token");
-    try {
-      if (token) {
-        await api.get("/logout", {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error al cerrar sesión en el backend:", error);
-    }
+  const logout = () => {
     localStorage.clear();
     setUser(null);
-  };  
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>

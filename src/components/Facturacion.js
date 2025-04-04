@@ -4,8 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2";
 import "../styles/Facturacion.css";
-import api from './api';
-
+import axios from "axios";  // Asegúrate de importar axios
 
 const logo = "/logoweb.jpg";
 
@@ -35,6 +34,9 @@ function Facturacion() {
     { codigo: "P01", descripcion: "Por definir" },
   ];
 
+  // Obtener la URL base de la API
+  const apiUrl = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     const session = JSON.parse(localStorage.getItem("userSession"));
     if (session?.userId) setUserId(session.userId);
@@ -42,7 +44,7 @@ function Facturacion() {
     const token = localStorage.getItem("token");
 
     if (token) {
-      api.get("/perfil", {
+      api.get(`${apiUrl}/perfil`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -66,7 +68,7 @@ function Facturacion() {
 
     if (tipo === "venta" && id_venta) {
       setTotalCompra(total);
-      fetch(`http://localhost:5000/detalle-venta/${id_venta}`, {
+      fetch(`${apiUrl}/detalle-venta/${id_venta}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -81,7 +83,7 @@ function Facturacion() {
         });
     } else {
       setTotalCompra(total);
-      api.get("/ultima-venta", {
+      api.get(`${apiUrl}/ultima-venta`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -125,7 +127,7 @@ function Facturacion() {
     }
   
     try {
-      const response = await api.get("/generar-factura", {
+      const response = await api.get(`${apiUrl}/generar-factura`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
