@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import api from '../components/api';
+import api from '../components/api'; // Asegúrate de que este api.js esté configurado correctamente
 
 const AuthContext = createContext();
 
@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
     }
     setLoading(false); // ✅ Ya terminó de verificar
-  }, []);  
+  }, []);
 
   const login = (token, userId, tipo_usuario) => {
     const sessionData = { token, userId, tipo_usuario };
@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }) => {
     try {
       if (token) {
         await api.get("/logout", {
-          method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json",

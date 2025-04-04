@@ -77,6 +77,11 @@ app.use("/", adminRoutes);
 
   const upload = multer({ storage });
 
+  // Este endpoint enviará la URL del backend
+  app.get("/api/url", (req, res) => {
+    res.json({ apiUrl: process.env.REACT_APP_API_URL });
+  });
+
   // Registro manual de usuarios normales
   app.post("/register", async (req, res) => {
     const { nombre, correo, contraseña } = req.body;
