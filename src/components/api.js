@@ -1,29 +1,37 @@
 import axios from "axios";
 
+// Almacenar la URL base para evitar múltiples solicitudes
+let baseURL = null;
+
 // Función para obtener la URL base del backend
 const getBackendUrl = async () => {
-  try {
-    const response = await axios.get("https://bikerlight-backend.onrender.com/api/url");
-    return response.data.apiUrl; // Devuelve la URL configurada en el backend
-  } catch (error) {
-    console.error("Error obteniendo la URL del backend:", error);
-    return null;
+  if (!baseURL) {  // Solo obtenemos la URL si aún no está almacenada
+    try {
+      const response = await axios.get("https://bikerlight-backend.onrender.com/api/url");
+      baseURL = response.data.apiUrl; // Guardamos la URL obtenida
+    } catch (error) {
+      console.error("Error obteniendo la URL del backend:", error);
+      baseURL = null;
+    }
   }
+  return baseURL;
 };
 
+// Crear un objeto api que usará la URL obtenida
 const api = {
   get: async (endpoint, options = {}) => {
-    const baseURL = await getBackendUrl();
-    if (baseURL) {
-      return fetch(`${baseURL}${endpoint}`, { ...options, method: "GET" });
+    const base = await getBackendUrl(); // Obtener la URL dinámica del backend
+    if (base) {
+      return fetch(`${base}${endpoint}`, { ...options, method: "GET" });
     } else {
       console.error("Base URL no disponible");
     }
   },
+
   post: async (endpoint, data, options = {}) => {
-    const baseURL = await getBackendUrl();
-    if (baseURL) {
-      return fetch(`${baseURL}${endpoint}`, {
+    const base = await getBackendUrl();
+    if (base) {
+      return fetch(`${base}${endpoint}`, {
         ...options,
         method: "POST",
         headers: {
@@ -38,9 +46,9 @@ const api = {
   },
 
   delete: async (endpoint, options = {}) => {
-    const baseURL = await getBackendUrl();
-    if (baseURL) {
-      return fetch(`${baseURL}${endpoint}`, { ...options, method: "DELETE" });
+    const base = await getBackendUrl();
+    if (base) {
+      return fetch(`${base}${endpoint}`, { ...options, method: "DELETE" });
     } else {
       console.error("Base URL no disponible");
     }

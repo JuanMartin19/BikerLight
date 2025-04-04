@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import api from '../components/api'; // Verifica que la ruta esté correcta
+import api from '../components/api';
 
 const AuthContext = createContext();
 
@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     try {
       if (token) {
+        // Asegurarse de obtener la URL base del backend de manera dinámica
         await api.get("/logout", {
           headers: {
             "Authorization": `Bearer ${token}`,
