@@ -35,7 +35,7 @@ const Reportes = () => {
         destruirGrafico();
 
         try {
-          const iotRef = ref(database, 'datosIoT'); // Conectamos con la base de datos de Firebase
+          const iotRef = ref(database, 'datosIoT'); // Conectamos con Firebase Realtime Database
           const snapshot = await get(iotRef);
 
           if (snapshot.exists()) {
@@ -270,72 +270,6 @@ const Reportes = () => {
     generarGrafico();
     return () => destruirGrafico();
   }, [reporteSeleccionado, reportes]);
-
-  // Cargar datos IoT para el reporte de la chaqueta
-  useEffect(() => {
-    const cargarIoTGeneral = async () => {
-      if (reporteSeleccionado === "iotUnico") {
-        destruirGrafico();
-  
-        try {
-          // Hacemos la solicitud al backend para obtener los datos de IoT
-          const res = await axios.get(`${apiUrl}/admin/reporte-iot-unico`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-  
-          if (res.data) {
-            setReportes(prev => ({ ...prev, iotUnico: res.data }));
-  
-            const ctx = document.getElementById("graficoUnico");
-  
-            const config = {
-              type: "bar",
-              data: {
-                labels: [
-                  "Distancia (mm)", "Tiempo (min)", "Velocidad (km/h)", "Luz (lux)",
-                  "Aceleración X", "Aceleración Y", "Aceleración Z",
-                  "Giroscopio X", "Giroscopio Y", "Giroscopio Z"
-                ],
-                datasets: [
-                  {
-                    label: "Datos de la Chaqueta IoT",
-                    data: [
-                      Number(res.data.distancia_recorrida),
-                      Number(res.data.tiempo_uso),
-                      Number(res.data.velocidad_estimada),
-                      Number(res.data.luz),
-                      Number(res.data.aceleracion.x),
-                      Number(res.data.aceleracion.y),
-                      Number(res.data.aceleracion.z),
-                      Number(res.data.giroscopio.x),
-                      Number(res.data.giroscopio.y),
-                      Number(res.data.giroscopio.z)
-                    ],
-                    backgroundColor: [
-                      "#36a2eb", "#ffcd56", "#ff6384", "#4bc0c0",
-                      "#8e44ad", "#2ecc71", "#e74c3c",
-                      "#2980b9", "#f1c40f", "#e67e22"
-                    ]
-                  }
-                ]
-              }
-            };
-  
-            const nuevaGrafica = new Chart(ctx, config);
-            setChart(nuevaGrafica);
-          } else {
-            Swal.fire("Error", "No se pudieron obtener los datos de IoT.", "error");
-          }
-        } catch (error) {
-          console.error("❌ Error cargando reporte IoT único desde la API:", error);
-          Swal.fire("Error", "No se pudo cargar el reporte IoT único.", "error");
-        }
-      }
-    };
-  
-    cargarIoTGeneral();
-    return () => destruirGrafico();
-  }, [reporteSeleccionado]);
 
   // Descargar el reporte en PDF
   const descargarPDF = () => {
