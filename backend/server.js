@@ -12,7 +12,7 @@ const app = express();
 app.use(cors({
   origin: [
     "https://mi-backend-se76.onrender.com",
-    "https://biker-light.vercel.app"
+    "https://frontend-nine-dusky-89.vercel.app"
   ],
   credentials: true
 }));
@@ -45,6 +45,14 @@ function verifyToken(req, res, next) {
     next();
   });
 }
+
+// Sirve los archivos estáticos de la carpeta 'build' de React
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// Ruta comodín para manejar todas las rutas no definidas
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build/index.html'));
+});
 
 // Prueba de conexión a la base de datos
 db.getConnection()
