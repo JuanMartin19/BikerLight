@@ -82,10 +82,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Este endpoint enviará la URL del backend
+// Endpoint para enviar la URL del backend
 app.get('/api/url', (req, res) => {
   res.json({ apiUrl: 'https://mi-backend-se76.onrender.com' });
 });
+
 
   // Registro manual de usuarios normales
   app.post("/register", async (req, res) => {
