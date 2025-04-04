@@ -178,9 +178,8 @@ function Home() {
 
   const handleLogout = async () => {
     try {
-      // Llamada al método de logout del contexto
-      await logout();  // El logout aquí es el que proviene del contexto de AuthContext
-      navigate("/login");  // Redirigir a login después de cerrar sesión
+      await logout();
+      navigate("/login");
     } catch (err) {
       console.error("Error cerrando sesión:", err);
     }
@@ -201,8 +200,8 @@ function Home() {
             Suscribirme
           </button>
           <button className="product-button logout-button" onClick={handleLogout}>
-            Cerrar Sesión
-          </button>
+          Cerrar Sesión
+        </button>
           <button className="product-button historial-button" onClick={() => navigate("/historial")}>
             Perfil de usuario
           </button>
