@@ -25,13 +25,13 @@ const GestionProductos = () => {
 
   const fetchProductos = async () => {
     try {
-      const res = await api.get(`${apiUrl}/admin/productos`, {
+      // Cambié `api.get` por `axios.get`
+      const res = await axios.get(`${apiUrl}/admin/productos`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = await res.json();
-      setProductos(data);
+      setProductos(res.data); // Usamos `res.data` para obtener los datos
     } catch (error) {
       console.error("Error al obtener productos:", error);
       Swal.fire({
@@ -59,21 +59,22 @@ const GestionProductos = () => {
     const method = modoEdicion ? "PUT" : "POST";
 
     try {
-      const res = await fetch(url, {
-        method,
+      // Cambié `fetch` por `axios`
+      const res = await axios({
+        method: method,
+        url: url,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        data: formData,
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      if (res.status === 200) {
         Swal.fire({
           icon: "success",
           title: "¡Éxito!",
-          text: data.message,
+          text: res.data.message,
         });
         resetForm();
         fetchProductos();
@@ -81,7 +82,7 @@ const GestionProductos = () => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: data.error || "No se pudo guardar el producto.",
+          text: res.data.error || "No se pudo guardar el producto.",
         });
       }
     } catch (error) {
@@ -128,26 +129,25 @@ const GestionProductos = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(`${apiUrl}/admin/productos/${id}`, {
-        method: "DELETE",
+      // Cambié `fetch` por `axios`
+      const res = await axios.delete(`${apiUrl}/admin/productos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      if (res.status === 200) {
         Swal.fire({
           icon: "success",
           title: "Eliminado",
-          text: data.message,
+          text: res.data.message,
         });
         fetchProductos();
       } else {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: data.error || "No se pudo eliminar el producto.",
+          text: res.data.error || "No se pudo eliminar el producto.",
         });
       }
     } catch (error) {
@@ -166,17 +166,15 @@ const GestionProductos = () => {
     formDataFile.append("imagen", file);
 
     try {
-      const res = await api.get(`${apiUrl}/admin/upload`, {
-        method: "POST",
+      // Cambié `api.get` por `axios.post`
+      const res = await axios.post(`${apiUrl}/admin/upload`, formDataFile, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: formDataFile,
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        setFormData((prev) => ({ ...prev, imagen: data.url }));
+      if (res.status === 200) {
+        setFormData((prev) => ({ ...prev, imagen: res.data.url }));
         Swal.fire({
           icon: "success",
           title: "Imagen subida",
@@ -186,7 +184,7 @@ const GestionProductos = () => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: data.error,
+          text: res.data.error,
         });
       }
     } catch (error) {

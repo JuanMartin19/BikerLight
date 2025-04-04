@@ -3,6 +3,7 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/Suscripcion.css";
+import axios from "axios";
 
 const logo = "/logoweb.jpg";
 
@@ -20,26 +21,25 @@ function Suscripcion() {
     if (savedToken) {
       setToken(savedToken);
 
-      api.get(`${apiUrl}/suscripciones`, {
+      // Reemplazamos api.get por axios.get
+      axios.get(`${apiUrl}/suscripciones`, {
         headers: {
           Authorization: `Bearer ${savedToken}`,
           "Content-Type": "application/json",
         },
       })
-        .then((res) => res.json())
-        .then((data) => setOpcionesSuscripcion(data))
+        .then((res) => setOpcionesSuscripcion(res.data))
         .catch((err) =>
           console.error("❌ Error al obtener suscripciones:", err)
         );
 
-      api.get(`${apiUrl}/suscripcion-activa`, {
+      axios.get(`${apiUrl}/suscripcion-activa`, {
         headers: {
           Authorization: `Bearer ${savedToken}`,
           "Content-Type": "application/json",
         },
       })
-        .then((res) => res.json())
-        .then((data) => setSuscripcionActiva(data))
+        .then((res) => setSuscripcionActiva(res.data))
         .catch((err) =>
           console.error("❌ Error al consultar suscripción activa:", err)
         );
@@ -50,20 +50,18 @@ function Suscripcion() {
     if (!duracionSeleccionada) return;
 
     try {
-      const response = await api.get(`${apiUrl}/comprar-suscripcion`, {
-        method: "POST",
+      const response = await axios.post(`${apiUrl}/comprar-suscripcion`, {
+        tipo: duracionSeleccionada.nombre.includes("Anual")
+          ? "ANUAL"
+          : "MENSUAL",
+      }, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          tipo: duracionSeleccionada.nombre.includes("Anual")
-            ? "ANUAL"
-            : "MENSUAL",
-        }),
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (!response.ok) {
         Swal.fire("Error", data.error || "Error al registrar la suscripción.", "error");

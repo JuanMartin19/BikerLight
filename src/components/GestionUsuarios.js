@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; 
 import { useNavigate } from "react-router-dom";
 import "../styles/GestionUsuarios.css";
 import Swal from "sweetalert2";
-import axios from "axios";
+import axios from "axios";  // Asegúrate de importar axios
 
 const GestionClientes = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -20,11 +20,11 @@ const GestionClientes = () => {
 
   const fetchUsuarios = async () => {
     try {
-      const res = await api.get(`${apiUrl}/admin/usuarios`, {
+      // Cambié `api.get` por `axios.get`
+      const res = await axios.get(`${apiUrl}/admin/usuarios`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      setUsuarios(data);
+      setUsuarios(res.data); // Usamos `res.data` para obtener los datos
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
       Swal.fire({
@@ -52,17 +52,17 @@ const GestionClientes = () => {
     if (!confirmacion.isConfirmed) return;
 
     try {
-      const res = await fetch(`${apiUrl}/admin/usuarios/${id_usuario}`, {
-        method: "PUT",
+      // Cambié `fetch` por `axios`
+      const res = await axios.put(`${apiUrl}/admin/usuarios/${id_usuario}`, {
+        tipo_usuario: nuevoRol
+      }, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ tipo_usuario: nuevoRol }),
+        }
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      if (res.status === 200) {
         Swal.fire({
           icon: "success",
           title: "Rol actualizado",
@@ -73,7 +73,7 @@ const GestionClientes = () => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: data.error || "No se pudo cambiar el rol.",
+          text: res.data.error || "No se pudo cambiar el rol.",
         });
       }
     } catch (error) {
@@ -89,17 +89,15 @@ const GestionClientes = () => {
   const registrarAdmin = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.get(`${apiUrl}/admin/registrar`, {
-        method: "POST",
+      // Cambié `api.get` por `axios.post`
+      const res = await axios.post(`${apiUrl}/admin/registrar`, nuevoAdmin, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(nuevoAdmin),
+        }
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      if (res.status === 200) {
         Swal.fire({
           icon: "success",
           title: "Administrador registrado",
@@ -111,7 +109,7 @@ const GestionClientes = () => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: data.error || "No se pudo registrar el administrador.",
+          text: res.data.error || "No se pudo registrar el administrador.",
         });
       }
     } catch (error) {

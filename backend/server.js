@@ -12,7 +12,7 @@ const app = express();
 app.use(cors({
   origin: [
     "https://mi-backend-se76.onrender.com",
-    "https://biker-light.vercel.app"
+    "https://frontend-nine-dusky-89.vercel.app"
   ],
   credentials: true
 }));
@@ -63,8 +63,8 @@ db.getConnection()
 module.exports.verifyToken = verifyToken;
 
 // 🔹 Importar rutas (ya funciona porque verifyToken ya está definido)
-const adminRoutes = require("./routes/admin");
-app.use("/admin", adminRoutes);
+const adminRoutes = require('./routes/admin');
+app.use('/admin', adminRoutes);
 
 // Middleware para servir archivos estáticos desde /uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

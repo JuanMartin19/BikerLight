@@ -24,7 +24,7 @@ function Login() {
     const { login } = useAuth();
 
     // Definir la URL base desde la variable de entorno
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = "https://mi-backend-se76.onrender.com";
 
     useEffect(() => {
         const closeOnEscape = (e) => {
@@ -39,12 +39,12 @@ function Login() {
 
         // Reemplazar axios con fetch
         fetch(`${apiUrl}/login`, {
-            method: "POST",
+            method: "POST", // Esto es correcto
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ correo, contraseña })
-        })
+        })        
             .then((res) => res.json())
             .then((data) => {
                 if (data.token) {

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Home.css";
+import axios from "axios";
 
 const logo = "/logoweb.jpg";
 
@@ -26,16 +27,17 @@ function Home() {
   useEffect(() => {
     const verificarSuscripcion = async () => {
       try {
-        const res = await api.get(`${apiUrl}/suscripcion-estado`, {
+        // Reemplazado `api.get` por `axios.get`
+        const res = await axios.get(`${apiUrl}/suscripcion-estado`, {
           headers: {
             Authorization: `Bearer ${user?.token}`,
             "Content-Type": "application/json",
           },
         });
 
-        if (!res.ok) throw new Error("Error al verificar suscripción");
+        if (res.status !== 200) throw new Error("Error al verificar suscripción");
 
-        const data = await res.json();
+        const data = res.data;
 
         const idGuardado = localStorage.getItem("userId");
         const hoy = new Date().toISOString().split("T")[0];
@@ -92,30 +94,15 @@ function Home() {
       localStorage.setItem("userId", id);
     }
 
-    api.get(`${apiUrl}/chaquetas`, {
-      method: "GET",
+    // Reemplazado `api.get` por `axios.get`
+    axios.get(`${apiUrl}/chaquetas`, {
       headers: {
         Authorization: `Bearer ${user.token}`,
         "Content-Type": "application/json",
       },
     })
       .then((res) => {
-        if (!res.ok) {
-          if (res.status === 401) {
-            Swal.fire({
-              icon: "warning",
-              title: "Sesión expirada",
-              text: "Por favor inicia sesión nuevamente.",
-              confirmButtonColor: "#e74c3c"
-            });
-            logout();
-          }
-          throw new Error("Acceso no autorizado");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setChaquetas(data);
+        setChaquetas(res.data); // Usamos `res.data` en lugar de `res.json()`
         setLoading(false);
       })
       .catch((err) => {
@@ -134,18 +121,16 @@ function Home() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    api.get(`${apiUrl}/carrito`, {
-      method: "GET",
+    // Reemplazado `api.get` por `axios.get`
+    axios.get(`${apiUrl}/carrito`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Error al cargar carrito");
-        return res.json();
+        setCarrito(res.data);
       })
-      .then((data) => setCarrito(data))
       .catch((err) => {
         console.error("Error al cargar carrito:", err);
         Swal.fire({
@@ -159,22 +144,17 @@ function Home() {
   // ➕ Agregar producto al carrito
   const agregarAlCarrito = async (producto) => {
     try {
-      const response = await api.get(`${apiUrl}/carrito`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ id_producto: producto.id, cantidad: 1 })
-      });
+      // Reemplazado `api.get` por `axios.get`
+      const response = await axios.post(`${apiUrl}/carrito`, 
+        { id_producto: producto.id, cantidad: 1 },
+        { headers: { Authorization: `Bearer ${user?.token}`, "Content-Type": "application/json" } }
+      );
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (response.status !== 200) {
         Swal.fire({
           icon: "error",
           title: "Stock insuficiente",
-          text: data.error || "No se pudo agregar al carrito.",
+          text: response.data.error || "No se pudo agregar al carrito.",
         });
         return;
       }
@@ -182,7 +162,7 @@ function Home() {
       Swal.fire({
         icon: "success",
         title: "Producto agregado",
-        text: data.message,
+        text: response.data.message,
         timer: 1800,
         showConfirmButton: false,
       });
@@ -195,6 +175,16 @@ function Home() {
       });
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      // Llamada al método de logout del contexto
+      await logout();  // El logout aquí es el que proviene del contexto de AuthContext
+      navigate("/login");  // Redirigir a login después de cerrar sesión
+    } catch (err) {
+      console.error("Error cerrando sesión:", err);
+    }
+  }; 
 
   return (
     <div className="home-container">
@@ -210,7 +200,7 @@ function Home() {
           <button className="product-button suscripcion-button" onClick={() => navigate("/suscripcion")}>
             Suscribirme
           </button>
-          <button className="product-button logout-button" onClick={() => logout()}>
+          <button className="product-button logout-button" onClick={handleLogout}>
             Cerrar Sesión
           </button>
           <button className="product-button historial-button" onClick={() => navigate("/historial")}>

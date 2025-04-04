@@ -44,16 +44,16 @@ function Facturacion() {
     const token = localStorage.getItem("token");
 
     if (token) {
-      api.get(`${apiUrl}/perfil`, {
+      // Cambié `api.get` por `axios.get`
+      axios.get(`${apiUrl}/perfil`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then((res) => res.json())
-        .then((data) => {
+        .then((res) => {
           setFacturaData((prev) => ({
             ...prev,
-            nombre: data.razon_social || "",
-            rfc: data.rfc || "",
-            direccion: data.direccion || "",
+            nombre: res.data.razon_social || "",
+            rfc: res.data.rfc || "",
+            direccion: res.data.direccion || "",
           }));
         })
         .catch((err) => {
@@ -68,11 +68,11 @@ function Facturacion() {
 
     if (tipo === "venta" && id_venta) {
       setTotalCompra(total);
-      fetch(`${apiUrl}/detalle-venta/${id_venta}`, {
+      // Cambié `api.get` por `axios.get`
+      axios.get(`${apiUrl}/detalle-venta/${id_venta}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then((res) => res.json())
-        .then((data) => setProductos(data))
+        .then((res) => setProductos(res.data))
         .catch((err) => {
           console.error("Error al traer detalle:", err);
           Swal.fire({
@@ -83,12 +83,12 @@ function Facturacion() {
         });
     } else {
       setTotalCompra(total);
-      api.get(`${apiUrl}/ultima-venta`, {
+      // Cambié `api.get` por `axios.get`
+      axios.get(`${apiUrl}/ultima-venta`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.productos) setProductos(data.productos);
+        .then((res) => {
+          if (res.data.productos) setProductos(res.data.productos);
         })
         .catch((err) => {
           console.error("Error al obtener última venta:", err);
@@ -107,7 +107,7 @@ function Facturacion() {
 
   const enviarFactura = async () => {
     const { nombre, rfc, direccion, usoCfdi } = facturaData;
-  
+
     if (!nombre.trim()) {
       Swal.fire({
         icon: "warning",
@@ -116,7 +116,7 @@ function Facturacion() {
       });
       return;
     }
-  
+
     if (!rfc || !direccion || !usoCfdi) {
       Swal.fire({
         icon: "warning",
@@ -125,28 +125,31 @@ function Facturacion() {
       });
       return;
     }
-  
+
     try {
-      const response = await api.get(`${apiUrl}/generar-factura`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
+      // Cambié `api.get` por `axios.post` para enviar los datos de la factura
+      const response = await axios.post(
+        `${apiUrl}/generar-factura`,
+        {
           Id_usuario: userId,
           Nombre: nombre.trim(),
           RFC: rfc,
           Direccion: direccion,
           Total: totalCompra,
           Id_venta: id_venta || null,
-          razon_social: nombre.trim(), // 👈 Esto asegura que no sea null
-        }),
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
+          razon_social: nombre.trim(),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (!response.status === 200) {
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -154,12 +157,12 @@ function Facturacion() {
         });
         return;
       }
-  
+
       if (data.productos) {
         setProductos(data.productos);
         setFacturaGenerada(true);
         generarPDF(data.productos);
-  
+
         Swal.fire({
           icon: "success",
           title: "Factura generada",
@@ -176,7 +179,7 @@ function Facturacion() {
         text: "No se pudo conectar con el servidor.",
       });
     }
-  };  
+  };
 
   const generarPDF = (productosGenerados) => {
     const doc = new jsPDF();

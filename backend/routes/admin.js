@@ -16,7 +16,7 @@ if (!admin.apps.length) {
 // 🔹 Ruta IoT general (todos ven los mismos datos)
 router.get("/reporte-iot", verifyToken, async (req, res) => {
   try {
-    const ref = admin.database().ref("datosIoT"); // <-- ya no usa id_usuario
+    const ref = admin.database().ref("datosIoT");
     const snapshot = await ref.once("value");
     const data = snapshot.val();
 
@@ -58,6 +58,7 @@ router.get("/reporte-iot", verifyToken, async (req, res) => {
   }
 });
 
+// 🔹 Ruta general IoT para admin (no requiere token si es solo para pruebas)
 // 🔹 Ruta general IoT para admin (no requiere token si es solo para pruebas)
 router.get("/admin/reporte-iot-unico", async (req, res) => {
   try {

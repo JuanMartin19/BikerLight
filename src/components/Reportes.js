@@ -1,10 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import Chart from "chart.js/auto";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import Swal from "sweetalert2";
-import "../styles/Reportes.css";
+import React, { useEffect, useState, useRef } from "react"; 
+import { useNavigate } from "react-router-dom"; 
+import Chart from "chart.js/auto"; 
+import jsPDF from "jspdf"; 
+import autoTable from "jspdf-autotable"; 
+import Swal from "sweetalert2"; 
+import "../styles/Reportes.css"; 
+import axios from 'axios'; 
+import { database, ref, get } from "../firebase";
 
 const Reportes = () => {
   const token = localStorage.getItem("token");
@@ -14,20 +16,7 @@ const Reportes = () => {
   const [reporteSeleccionado, setReporteSeleccionado] = useState("");
   const intervalRef = useRef(null);
 
-  // Obtener la URL base de la API
-  const apiUrl = process.env.REACT_APP_API_URL;
-
-  const cargarReportes = async () => {
-    try {
-      const res = await api.get(`${apiUrl}/admin/reportes-detallados`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setReportes(data);
-    } catch (error) {
-      Swal.fire("Error", "No se pudo obtener la información de los reportes.", "error");
-    }
-  };
+  const apiUrl = process.env.REACT_APP_API_URL;  // Definir la URL de la API desde las variables de entorno
 
   const destruirGrafico = () => {
     if (chart) {
@@ -41,17 +30,135 @@ const Reportes = () => {
   };
 
   useEffect(() => {
-    cargarReportes();
-  }, []);
+    const cargarDatosIoT = async () => {
+      if (reporteSeleccionado === "iotUnico") {
+        destruirGrafico();
 
+        try {
+          const iotRef = ref(database, 'datosIoT'); // Conectamos con la base de datos de Firebase
+          const snapshot = await get(iotRef);
+
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+
+            setReportes(prev => ({ ...prev, iotUnico: data }));  // Guardamos los datos en el estado
+
+            const ctx = document.getElementById("graficoUnico");
+
+            const config = {
+              type: "bar",
+              data: {
+                labels: [
+                  "Distancia (mm)", "Tiempo (min)", "Velocidad (km/h)", "Luz (lux)",
+                  "Aceleración X", "Aceleración Y", "Aceleración Z",
+                  "Giroscopio X", "Giroscopio Y", "Giroscopio Z"
+                ],
+                datasets: [
+                  {
+                    label: "Datos de la Chaqueta IoT",
+                    data: [
+                      Number(data.distancia_recorrida),
+                      Number(data.tiempo_uso),
+                      Number(data.velocidad_estimada),
+                      Number(data.luz),
+                      Number(data.aceleracion.x),
+                      Number(data.aceleracion.y),
+                      Number(data.aceleracion.z),
+                      Number(data.giroscopio.x),
+                      Number(data.giroscopio.y),
+                      Number(data.giroscopio.z)
+                    ],
+                    backgroundColor: [
+                      "#36a2eb", "#ffcd56", "#ff6384", "#4bc0c0",
+                      "#8e44ad", "#2ecc71", "#e74c3c",
+                      "#2980b9", "#f1c40f", "#e67e22"
+                    ]
+                  }
+                ]
+              }
+            };
+
+            const nuevaGrafica = new Chart(ctx, config);
+            setChart(nuevaGrafica);
+          } else {
+            console.log("No hay datos disponibles en Firebase");
+            Swal.fire("Error", "No se pudo obtener el reporte IoT único.", "error");
+          }
+        } catch (error) {
+          console.error("❌ Error cargando reporte IoT único desde Firebase:", error);
+          Swal.fire("Error", "No se pudo cargar el reporte IoT único.", "error");
+        }
+      }
+    };
+
+    cargarDatosIoT();
+    return () => destruirGrafico();
+  }, [reporteSeleccionado]);
+
+  const Reportes = () => {
+    const [datosIoT, setDatosIoT] = useState(null);
+    
+    useEffect(() => {
+      const obtenerDatosIoT = async () => {
+        try {
+          const iotRef = ref(database, "datosIoT"); // Dirección de tu nodo en Firebase
+          const snapshot = await get(iotRef);
+  
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            setDatosIoT(data);  // Guarda los datos en el estado
+          } else {
+            console.log("No hay datos disponibles.");
+          }
+        } catch (error) {
+          console.error("Error al obtener los datos de Firebase:", error);
+        }
+      };
+  
+      obtenerDatosIoT();
+    }, []);
+  
+    return (
+      <div>
+        <h2>Reporte de Datos IoT</h2>
+        {datosIoT ? (
+          <pre>{JSON.stringify(datosIoT, null, 2)}</pre>
+        ) : (
+          <p>Cargando datos...</p>
+        )}
+      </div>
+    );
+  };
+
+  // Cargar los reportes desde el backend
+  useEffect(() => {
+    const cargarReportes = async () => {
+      try {
+        const res = await axios.get(`${apiUrl}/admin/reportes-detallados`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data) {
+          setReportes(res.data);
+        } else {
+          Swal.fire("Error", "No se encontraron datos para los reportes.", "info");
+        }
+      } catch (error) {
+        Swal.fire("Error", "No se pudo obtener la información de los reportes.", "error");
+      }
+    };
+
+    cargarReportes();
+  }, [token]);
+
+  // Generar el gráfico de acuerdo con el reporte seleccionado
   useEffect(() => {
     destruirGrafico();
     if (!reporteSeleccionado) return;
-  
+
     const generarGrafico = async () => {
       const ctx = document.getElementById("graficoUnico");
       let config;
-  
+
       switch (reporteSeleccionado) {
         case "top":
           if (!reportes?.topProductos) return;
@@ -67,7 +174,7 @@ const Reportes = () => {
             }
           };
           break;
-  
+
         case "categoria":
           if (!reportes?.porCategoria) return;
           config = {
@@ -82,7 +189,7 @@ const Reportes = () => {
             }
           };
           break;
-  
+
         case "porDia":
           if (!reportes?.porDia) return;
           config = {
@@ -99,7 +206,7 @@ const Reportes = () => {
             }
           };
           break;
-  
+
         case "suscripciones":
           if (!reportes?.suscripciones) return;
           config = {
@@ -114,86 +221,11 @@ const Reportes = () => {
             }
           };
           break;
-  
-        case "duracionSuscripciones":
-          if (!reportes?.duracionSuscripciones) return;
-          config = {
-            type: "bar",
-            data: {
-              labels: reportes.duracionSuscripciones.map(s => s.tipo),
-              datasets: [{
-                label: "Duración Promedio (días)",
-                data: reportes.duracionSuscripciones.map(s => s.duracion_promedio),
-                backgroundColor: "#8e44ad"
-              }]
-            }
-          };
-          break;
-  
-        case "chaquetasVendidas":
-          if (!reportes?.chaquetasVendidas) return;
-          config = {
-            type: "bar",
-            data: {
-              labels: reportes.chaquetasVendidas.map(p => p.nombre),
-              datasets: [{
-                label: "Unidades Vendidas (Chaquetas)",
-                data: reportes.chaquetasVendidas.map(p => p.total_vendidos),
-                backgroundColor: "#36a2eb"
-              }]
-            }
-          };
-          break;
-  
-        case "rutas":
-          if (!reportes?.rutas || reportes.rutas.length === 0) {
-            Swal.fire("Sin datos", "No hay rutas registradas para mostrar.", "info");
-            return;
-          }
-          config = {
-            type: "bar",
-            data: {
-              labels: reportes.rutas.map(r => r.nombre_ruta),
-              datasets: [{
-                label: "Distancia (km)",
-                data: reportes.rutas.map(r => r.distancia_km),
-                backgroundColor: "#2ecc71"
-              }]
-            }
-          };
-          break;
-  
-        case "iotGeneral":
-          // iotGeneral se maneja en un segundo useEffect
-          return;
-  
-        default:
-          return;
-      }
-  
-      const nuevaGrafica = new Chart(ctx, config);
-      setChart(nuevaGrafica);
-    };
-  
-    generarGrafico();
-    return () => destruirGrafico();
-  }, [reporteSeleccionado]);  
 
-  useEffect(() => {
-    const cargarIoTGeneral = async () => {
-      if (reporteSeleccionado === "iotUnico") {
-        destruirGrafico();
-  
-        try {
-          const res = await api.get(`${apiUrl}/admin/reporte-iot-unico`);
-          const data = await res.json();
-  
-          // ✅ Guardamos los datos para el PDF
-          setReportes(prev => ({ ...prev, iotUnico: data }));
-  
-          const ctx = document.getElementById("graficoUnico");
-  
-          const config = {
+        case "iotUnico":
+          // Aquí cargamos el reporte IoT
+          if (!reportes?.iotUnico) return;
+          config = {
             type: "bar",
             data: {
               labels: [
@@ -205,16 +237,16 @@ const Reportes = () => {
                 {
                   label: "Datos de la Chaqueta IoT",
                   data: [
-                    Number(data.distancia_recorrida),
-                    Number(data.tiempo_uso),
-                    Number(data.velocidad_estimada),
-                    Number(data.luz),
-                    Number(data.aceleracion.x),
-                    Number(data.aceleracion.y),
-                    Number(data.aceleracion.z),
-                    Number(data.giroscopio.x),
-                    Number(data.giroscopio.y),
-                    Number(data.giroscopio.z)
+                    Number(reportes.iotUnico.distancia_recorrida),
+                    Number(reportes.iotUnico.tiempo_uso),
+                    Number(reportes.iotUnico.velocidad_estimada),
+                    Number(reportes.iotUnico.luz),
+                    Number(reportes.iotUnico.aceleracion.x),
+                    Number(reportes.iotUnico.aceleracion.y),
+                    Number(reportes.iotUnico.aceleracion.z),
+                    Number(reportes.iotUnico.giroscopio.x),
+                    Number(reportes.iotUnico.giroscopio.y),
+                    Number(reportes.iotUnico.giroscopio.z)
                   ],
                   backgroundColor: [
                     "#36a2eb", "#ffcd56", "#ff6384", "#4bc0c0",
@@ -225,11 +257,77 @@ const Reportes = () => {
               ]
             }
           };
+          break;
+
+        default:
+          return;
+      }
+
+      const nuevaGrafica = new Chart(ctx, config);
+      setChart(nuevaGrafica);
+    };
+
+    generarGrafico();
+    return () => destruirGrafico();
+  }, [reporteSeleccionado, reportes]);
+
+  // Cargar datos IoT para el reporte de la chaqueta
+  useEffect(() => {
+    const cargarIoTGeneral = async () => {
+      if (reporteSeleccionado === "iotUnico") {
+        destruirGrafico();
   
-          const nuevaGrafica = new Chart(ctx, config);
-          setChart(nuevaGrafica);
+        try {
+          // Hacemos la solicitud al backend para obtener los datos de IoT
+          const res = await axios.get(`${apiUrl}/admin/reporte-iot-unico`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+  
+          if (res.data) {
+            setReportes(prev => ({ ...prev, iotUnico: res.data }));
+  
+            const ctx = document.getElementById("graficoUnico");
+  
+            const config = {
+              type: "bar",
+              data: {
+                labels: [
+                  "Distancia (mm)", "Tiempo (min)", "Velocidad (km/h)", "Luz (lux)",
+                  "Aceleración X", "Aceleración Y", "Aceleración Z",
+                  "Giroscopio X", "Giroscopio Y", "Giroscopio Z"
+                ],
+                datasets: [
+                  {
+                    label: "Datos de la Chaqueta IoT",
+                    data: [
+                      Number(res.data.distancia_recorrida),
+                      Number(res.data.tiempo_uso),
+                      Number(res.data.velocidad_estimada),
+                      Number(res.data.luz),
+                      Number(res.data.aceleracion.x),
+                      Number(res.data.aceleracion.y),
+                      Number(res.data.aceleracion.z),
+                      Number(res.data.giroscopio.x),
+                      Number(res.data.giroscopio.y),
+                      Number(res.data.giroscopio.z)
+                    ],
+                    backgroundColor: [
+                      "#36a2eb", "#ffcd56", "#ff6384", "#4bc0c0",
+                      "#8e44ad", "#2ecc71", "#e74c3c",
+                      "#2980b9", "#f1c40f", "#e67e22"
+                    ]
+                  }
+                ]
+              }
+            };
+  
+            const nuevaGrafica = new Chart(ctx, config);
+            setChart(nuevaGrafica);
+          } else {
+            Swal.fire("Error", "No se pudieron obtener los datos de IoT.", "error");
+          }
         } catch (error) {
-          console.error("❌ Error cargando reporte IoT único:", error);
+          console.error("❌ Error cargando reporte IoT único desde la API:", error);
           Swal.fire("Error", "No se pudo cargar el reporte IoT único.", "error");
         }
       }
@@ -237,8 +335,9 @@ const Reportes = () => {
   
     cargarIoTGeneral();
     return () => destruirGrafico();
-  }, [reporteSeleccionado]);    
+  }, [reporteSeleccionado]);
 
+  // Descargar el reporte en PDF
   const descargarPDF = () => {
     const doc = new jsPDF();
     doc.text("Reporte: " + reporteSeleccionado.toUpperCase(), 14, 15);
@@ -256,45 +355,21 @@ const Reportes = () => {
         head = [["Producto", "Unidades Vendidas"]];
         body = reportes.topProductos.map(p => [p.nombre, p.total_vendidos]);
         break;
-      case "categoria":
-        head = [["Categoría", "Productos Vendidos"]];
-        body = reportes.porCategoria.map(p => [p.categoria, p.total_vendidos]);
-        break;
-      case "porDia":
-        head = [["Fecha", "Total del Día"]];
-        body = reportes.porDia.map(p => [p.fecha, `$${p.total_dia.toFixed(2)}`]);
-        break;
-      case "suscripciones":
-        head = [["Tipo", "Cantidad"]];
-        body = reportes.suscripciones.map(s => [s.tipo, s.cantidad]);
-        break;
-      case "duracionSuscripciones":
-        head = [["Tipo", "Duración Promedio (días)"]];
-        body = reportes.duracionSuscripciones.map(s => [s.tipo, s.duracion_promedio.toFixed(2)]);
-        break;
-      case "chaquetasVendidas":
-        head = [["Modelo", "Unidades Vendidas"]];
-        body = reportes.chaquetasVendidas.map(c => [c.nombre, c.total_vendidos]);
-        break;
-      case "rutas":
-        head = [["Ruta", "Distancia (km)", "Duración (segundos)", "Fecha"]];
-        body = reportes.rutas.map(r => [r.nombre_ruta, r.distancia_km, r.tiempo_segundos, r.fecha]);
-        break;
       case "iotUnico":
-          head = [["Dato", "Valor"]];
-          body = [
-            ["Distancia (mm)", reportes.iotUnico?.distancia_recorrida],
-            ["Tiempo (min)", reportes.iotUnico?.tiempo_uso],
-            ["Velocidad (km/h)", reportes.iotUnico?.velocidad_estimada],
-            ["Luz (lux)", reportes.iotUnico?.luz],
-            ["Aceleración X", reportes.iotUnico?.aceleracion?.x],
-            ["Aceleración Y", reportes.iotUnico?.aceleracion?.y],
-            ["Aceleración Z", reportes.iotUnico?.aceleracion?.z],
-            ["Giroscopio X", reportes.iotUnico?.giroscopio?.x],
-            ["Giroscopio Y", reportes.iotUnico?.giroscopio?.y],
-            ["Giroscopio Z", reportes.iotUnico?.giroscopio?.z]
-          ];
-          break;        
+        head = [["Dato", "Valor"]];
+        body = [
+          ["Distancia (mm)", reportes.iotUnico.distancia_recorrida],
+          ["Tiempo (min)", reportes.iotUnico.tiempo_uso],
+          ["Velocidad (km/h)", reportes.iotUnico.velocidad_estimada],
+          ["Luz (lux)", reportes.iotUnico.luz],
+          ["Aceleración X", reportes.iotUnico.aceleracion.x],
+          ["Aceleración Y", reportes.iotUnico.aceleracion.y],
+          ["Aceleración Z", reportes.iotUnico.aceleracion.z],
+          ["Giroscopio X", reportes.iotUnico.giroscopio.x],
+          ["Giroscopio Y", reportes.iotUnico.giroscopio.y],
+          ["Giroscopio Z", reportes.iotUnico.giroscopio.z]
+        ];
+        break;
       default:
         return;
     }
@@ -335,30 +410,6 @@ const Reportes = () => {
         <div className="grafica-box">
           <canvas id="graficoUnico"></canvas>
           <button onClick={descargarPDF}>📥 Descargar PDF</button>
-        </div>
-      )}
-
-      {reporteSeleccionado === "rutas" && reportes?.rutasPorUsuario?.length > 0 && (
-        <div className="tabla-usuarios-rutas">
-          <h3>🧑‍🦱 Kilometraje Total por Usuario</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Nombre del Usuario</th>
-                <th>Distancia Total (km)</th>
-                <th>Tiempo Total (segundos)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportes.rutasPorUsuario.map((u, index) => (
-                <tr key={index}>
-                  <td>{u.nombre}</td>
-                  <td>{u.distancia_total}</td>
-                  <td>{u.tiempo_total}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       )}
 

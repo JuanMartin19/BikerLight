@@ -1,4 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";  // Asegúrate de importar axios
+import Swal from "sweetalert2"; // Asegúrate de importar Swal
+
+const apiUrl = process.env.REACT_APP_API_URL;  // Define apiUrl, si no está definido ya
 
 const AuthContext = createContext();
 
@@ -27,9 +31,39 @@ export const AuthProvider = ({ children }) => {
     setUser(sessionData);
   };
 
-  const logout = () => {
-    localStorage.clear();
-    setUser(null);
+  // Función de logout
+  const logout = async () => {
+    try {
+      // Llamar al endpoint de logout en el backend
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${apiUrl}/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Limpiar los datos de sesión
+      setUser(null);
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      Swal.fire({
+        icon: "success",
+        title: "Sesión cerrada",
+        text: "Has cerrado sesión correctamente.",
+      });
+    } catch (error) {
+      console.error("❌ Error al cerrar sesión:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo cerrar sesión.",
+      });
+    }
   };
 
   return (

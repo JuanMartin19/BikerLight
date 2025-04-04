@@ -27,12 +27,11 @@ function Historial() {
 
   const cargarVentas = async () => {
     try {
-      const res = await api.get(`${apiUrl}/historial-compras`, {
+      // Reemplazado `api.get` por `axios.get`
+      const res = await axios.get(`${apiUrl}/historial-compras`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      const arrayVentas = Array.isArray(data) ? data : data.ventas || [];
-      setVentas(arrayVentas);
+      setVentas(res.data); // Usamos `res.data` en lugar de `res.json()`
     } catch (err) {
       console.error("Error al obtener historial:", err);
       Swal.fire({
@@ -45,12 +44,12 @@ function Historial() {
 
   const cargarPerfil = async () => {
     try {
-      const res = await api.get(`${apiUrl}/perfil`, {
+      // Reemplazado `api.get` por `axios.get`
+      const res = await axios.get(`${apiUrl}/perfil`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      setPerfil(data);
-      setPerfilEditado(data);
+      setPerfil(res.data); // Usamos `res.data` en lugar de `res.json()`
+      setPerfilEditado(res.data);
     } catch (err) {
       console.error("Error al obtener perfil:", err);
       Swal.fire({
@@ -63,20 +62,21 @@ function Historial() {
 
   const generarGraficoIoT = async () => {
     try {
-      const res = await fetch(`${apiUrl}/reporte-iot`, {
+      // Reemplazado `fetch` por `axios`
+      const res = await axios.get(`${apiUrl}/reporte-iot`, {
         headers: { Authorization: `Bearer ${token}` },
-      });        
+      });
 
-      const iot = await res.json();
+      const iot = res.data; // Usamos `res.data` en lugar de `res.json()`
 
       const ctx = chartCanvasRef.current?.getContext("2d");
 
       if (!iot || !iot.distancia_recorrida || !ctx) {
-        setHayDatosIot(false); // <-- Asegura que se muestre el mensaje
+        setHayDatosIot(false); // Asegura que se muestre el mensaje
         return Swal.fire("Sin datos", "No hay datos IoT disponibles.", "info");
       }
-      
-      setHayDatosIot(true);      
+
+      setHayDatosIot(true);
 
       if (chartRef.current) {
         chartRef.current.destroy();
@@ -130,13 +130,14 @@ function Historial() {
   const actualizarGraficoIoT = async () => {
     try {
       if (!perfil?.id_usuario) return;
-  
-      const res = await fetch(`${apiUrl}/reporte-iot`, {
+
+      // Reemplazado `fetch` por `axios`
+      const res = await axios.get(`${apiUrl}/reporte-iot`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
-      const iot = await res.json();
-  
+
+      const iot = res.data;
+
       if (chartRef.current && chartRef.current.data?.datasets?.[0]) {
         chartRef.current.data.datasets[0].data = [
           Number(iot.distancia_recorrida),
@@ -155,27 +156,27 @@ function Historial() {
     } catch (error) {
       console.error("Error al actualizar gráfica IoT:", error);
     }
-  };  
+  };
 
   useEffect(() => {
     cargarPerfil();
     cargarVentas();
     generarGraficoIoT();
   }, []);
-  
+
   useEffect(() => {
     if (perfil?.id_usuario) {
       generarGraficoIoT();
-  
+
       intervalRef.current = setInterval(() => {
         cargarVentas();
       }, 1000);
-  
+
       iotInterval.current = setInterval(() => {
         actualizarGraficoIoT();
       }, 1000);
     }
-  
+
     return () => {
       clearInterval(intervalRef.current);
       clearInterval(iotInterval.current);
@@ -183,7 +184,7 @@ function Historial() {
         chartRef.current.destroy();
       }
     };
-  }, [perfil]);  
+  }, [perfil]);
 
   const irAFactura = (venta) => {
     navigate("/facturacion", {
@@ -202,17 +203,15 @@ function Historial() {
 
   const guardarCambios = async () => {
     try {
-      const res = await api.get(`${apiUrl}/perfil/actualizar`, {
-        method: "PUT",
+      // Reemplazado `api.get` por `axios.put`
+      const res = await axios.put(`${apiUrl}/perfil/actualizar`, perfilEditado, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify(perfilEditado),
+        }
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      if (res.status === 200) {
         Swal.fire({
           icon: "success",
           title: "Perfil actualizado",
@@ -220,13 +219,13 @@ function Historial() {
           timer: 2000,
           showConfirmButton: false,
         });
-        setPerfil(data);
+        setPerfil(res.data);
         setEditando(false);
       } else {
         Swal.fire({
           icon: "error",
           title: "Error al actualizar",
-          text: data.error || "No se pudo actualizar el perfil.",
+          text: res.data.error || "No se pudo actualizar el perfil.",
         });
       }
     } catch (error) {
