@@ -6,7 +6,7 @@ import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2"; 
 import "../styles/Reportes.css"; 
 import axios from 'axios'; 
-import { database, ref, get } from "../firebase";
+import { database, ref, get } from "../firebase.js";
 
 const Reportes = () => {
   const token = localStorage.getItem("token");
@@ -16,7 +16,7 @@ const Reportes = () => {
   const [reporteSeleccionado, setReporteSeleccionado] = useState("");
   const intervalRef = useRef(null);
 
-  const apiUrl = process.env.REACT_APP_API_URL;  // Definir la URL de la API desde las variables de entorno
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const destruirGrafico = () => {
     if (chart) {
@@ -35,12 +35,11 @@ const Reportes = () => {
         destruirGrafico();
 
         try {
-          const iotRef = ref(database, 'datosIoT'); // Conectamos con Firebase Realtime Database
+          const iotRef = ref(database, 'datosIoT');
           const snapshot = await get(iotRef);
 
           if (snapshot.exists()) {
             const data = snapshot.val();
-
             setReportes(prev => ({ ...prev, iotUnico: data }));  // Guardamos los datos en el estado
 
             const ctx = document.getElementById("graficoUnico");
