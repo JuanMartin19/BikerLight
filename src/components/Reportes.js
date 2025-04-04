@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react"; 
 import { useNavigate } from "react-router-dom"; 
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import Chart from "chart.js/auto"; 
 import jsPDF from "jspdf"; 
 import autoTable from "jspdf-autotable"; 
 import Swal from "sweetalert2"; 
 import "../styles/Reportes.css"; 
-import axios from 'axios'; 
-import { database, ref, get } from "../firebase.js";
+import { database, firestore, ref, get } from "../firebase.js";
 
 const Reportes = () => {
   const token = localStorage.getItem("token");
@@ -35,13 +35,14 @@ const Reportes = () => {
         destruirGrafico();
 
         try {
-          const iotRef = ref(database, 'datosIoT');
-          const snapshot = await get(iotRef);
+          // Obtener los datos de Firestore
+          const iotCollectionRef = collection(firestore, "datosIoT");  // Acceder a la colección 'datosIoT'
+          const snapshot = await getDocs(iotCollectionRef);
+          const data = snapshot.docs.map(doc => doc.data()); // Convertir documentos en objetos
 
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-            setReportes(prev => ({ ...prev, iotUnico: data }));  // Guardamos los datos en el estado
-
+          if (data.length > 0) {
+            setReportes(prev => ({ ...prev, iotUnico: data[0] })); // Usamos el primer documento encontrado
+          
             const ctx = document.getElementById("graficoUnico");
 
             const config = {
@@ -56,16 +57,16 @@ const Reportes = () => {
                   {
                     label: "Datos de la Chaqueta IoT",
                     data: [
-                      Number(data.distancia_recorrida),
-                      Number(data.tiempo_uso),
-                      Number(data.velocidad_estimada),
-                      Number(data.luz),
-                      Number(data.aceleracion.x),
-                      Number(data.aceleracion.y),
-                      Number(data.aceleracion.z),
-                      Number(data.giroscopio.x),
-                      Number(data.giroscopio.y),
-                      Number(data.giroscopio.z)
+                      Number(data[0].distancia_recorrida),
+                      Number(data[0].tiempo_uso),
+                      Number(data[0].velocidad_estimada),
+                      Number(data[0].luz),
+                      Number(data[0].aceleracion.x),
+                      Number(data[0].aceleracion.y),
+                      Number(data[0].aceleracion.z),
+                      Number(data[0].giroscopio.x),
+                      Number(data[0].giroscopio.y),
+                      Number(data[0].giroscopio.z)
                     ],
                     backgroundColor: [
                       "#36a2eb", "#ffcd56", "#ff6384", "#4bc0c0",
@@ -84,7 +85,7 @@ const Reportes = () => {
             Swal.fire("Error", "No se pudo obtener el reporte IoT único.", "error");
           }
         } catch (error) {
-          console.error("❌ Error cargando reporte IoT único desde Firebase:", error);
+          console.error("❌ Error cargando reporte IoT único desde Firestore:", error);
           Swal.fire("Error", "No se pudo cargar el reporte IoT único.", "error");
         }
       }
