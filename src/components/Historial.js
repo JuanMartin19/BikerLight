@@ -4,6 +4,7 @@ import Chart from "chart.js/auto";
 import Swal from "sweetalert2";
 import "../styles/Historial.css";
 import { AuthContext } from "../context/AuthContext";
+import api from './api';
 
 function Historial() {
   const [ventas, setVentas] = useState([]);
@@ -23,7 +24,7 @@ function Historial() {
 
   const cargarVentas = async () => {
     try {
-      const res = await fetch("http://localhost:5000/historial-compras", {
+      const res = await api.get("/historial-compras", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -41,7 +42,7 @@ function Historial() {
 
   const cargarPerfil = async () => {
     try {
-      const res = await fetch("http://localhost:5000/perfil", {
+      const res = await api.get("/perfil", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -198,7 +199,7 @@ function Historial() {
 
   const guardarCambios = async () => {
     try {
-      const res = await fetch("http://localhost:5000/perfil/actualizar", {
+      const res = await api.get("/perfil/actualizar", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

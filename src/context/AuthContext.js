@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     try {
       if (token) {
-        await fetch("http://localhost:5000/logout", {
+        await api.get("/logout", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`,

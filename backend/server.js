@@ -9,7 +9,10 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ["https://tudominio-en-vercel.vercel.app"],
+  credentials: true
+}));
 app.use(express.json());
 
 // 🔹 Middleware para verificar autenticación con JWT (ANTES del require)

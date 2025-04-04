@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/GestionUsuarios.css";
 import Swal from "sweetalert2";
+import api from './api';
+
 
 const GestionClientes = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -16,7 +18,7 @@ const GestionClientes = () => {
 
   const fetchUsuarios = async () => {
     try {
-      const res = await fetch("http://localhost:5000/admin/usuarios", {
+      const res = await api.get("/admin/usuarios", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -85,7 +87,7 @@ const GestionClientes = () => {
   const registrarAdmin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5000/admin/registrar", {
+      const res = await api.get("/admin/registrar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

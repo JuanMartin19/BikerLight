@@ -7,6 +7,7 @@ import "../styles/Login.css";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import Swal from "sweetalert2";
+import api from './api';
 
 const logo = "/logoweb.jpg";
 
@@ -34,7 +35,7 @@ function Login() {
     const handleLogin = (e) => {
         e.preventDefault();
 
-        fetch("http://localhost:5000/login", {
+        api.get("/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ correo, contraseña }),
@@ -85,7 +86,7 @@ function Login() {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://localhost:5000/register", {
+            const response = await api.get("/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -130,7 +131,7 @@ function Login() {
             const decoded = jwtDecode(credentialResponse.credential);
             const { email, name } = decoded;
 
-            const res = await fetch("http://localhost:5000/auth/google", {
+            const res = await api.get("/auth/google", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, name })
@@ -185,7 +186,7 @@ function Login() {
             const decoded = jwtDecode(credentialResponse.credential);
             const { email, name } = decoded;
 
-            const res = await fetch("http://localhost:5000/register/google", {
+            const res = await api.get("/register/google", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, name })

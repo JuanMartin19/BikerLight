@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Home.css";
+import api from './api';
 
 const logo = "/logoweb.jpg";
 
@@ -24,7 +25,7 @@ function Home() {
   useEffect(() => {
     const verificarSuscripcion = async () => {
       try {
-        const res = await fetch("http://localhost:5000/suscripcion-estado", {
+        const res = await api.get("/suscripcion-estado", {
           headers: {
             Authorization: `Bearer ${user?.token}`,
             "Content-Type": "application/json",
@@ -90,7 +91,7 @@ function Home() {
       localStorage.setItem("userId", id);
     }
 
-    fetch("http://localhost:5000/chaquetas", {
+    api.get("/chaquetas", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${user.token}`,
@@ -132,7 +133,7 @@ function Home() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("http://localhost:5000/carrito", {
+    api.get("/carrito", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -157,7 +158,7 @@ function Home() {
   // ➕ Agregar producto al carrito
   const agregarAlCarrito = async (producto) => {
     try {
-      const response = await fetch("http://localhost:5000/carrito", {
+      const response = await api.get("/carrito", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${user?.token}`,

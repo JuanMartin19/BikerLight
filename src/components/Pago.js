@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/Pago.css";
+import api from './api';
+
 
 function Pago() {
   const navigate = useNavigate();

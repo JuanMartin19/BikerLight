@@ -3,6 +3,7 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/Suscripcion.css";
+import api from './api';
 
 const logo = "/logoweb.jpg";
 
@@ -18,7 +19,7 @@ function Suscripcion() {
     if (savedToken) {
       setToken(savedToken);
 
-      fetch("http://localhost:5000/suscripciones", {
+      api.get("/suscripciones", {
         headers: {
           Authorization: `Bearer ${savedToken}`,
           "Content-Type": "application/json",
@@ -30,7 +31,7 @@ function Suscripcion() {
           console.error("❌ Error al obtener suscripciones:", err)
         );
 
-      fetch("http://localhost:5000/suscripcion-activa", {
+      api.get("/suscripcion-activa", {
         headers: {
           Authorization: `Bearer ${savedToken}`,
           "Content-Type": "application/json",
@@ -48,7 +49,7 @@ function Suscripcion() {
     if (!duracionSeleccionada) return;
 
     try {
-      const response = await fetch("http://localhost:5000/comprar-suscripcion", {
+      const response = await api.get("/comprar-suscripcion", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

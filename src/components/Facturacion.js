@@ -4,6 +4,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2";
 import "../styles/Facturacion.css";
+import api from './api';
+
 
 const logo = "/logoweb.jpg";
 
@@ -40,7 +42,7 @@ function Facturacion() {
     const token = localStorage.getItem("token");
 
     if (token) {
-      fetch("http://localhost:5000/perfil", {
+      api.get("/perfil", {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -79,7 +81,7 @@ function Facturacion() {
         });
     } else {
       setTotalCompra(total);
-      fetch("http://localhost:5000/ultima-venta", {
+      api.get("/ultima-venta", {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -123,7 +125,7 @@ function Facturacion() {
     }
   
     try {
-      const response = await fetch("http://localhost:5000/generar-factura", {
+      const response = await api.get("/generar-factura", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

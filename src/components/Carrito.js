@@ -3,6 +3,8 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/Carrito.css";
+import api from './api';
+
 
 const logo = "/logoweb.jpg";
 
@@ -22,7 +24,7 @@ function Carrito() {
 
     if (!token) return;
 
-    fetch("http://localhost:5000/carrito", {
+    api.get("/carrito", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -45,7 +47,7 @@ function Carrito() {
     if (nuevaCantidad <= 0) return;
 
     try {
-      const res = await fetch("http://localhost:5000/carrito", {
+      const res = await api.get("/carrito", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -125,7 +127,7 @@ function Carrito() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/procesar-pago", {
+      const response = await api.get("/procesar-pago", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

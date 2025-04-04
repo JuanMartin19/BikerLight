@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../styles/AdminDashboard.css";
+import api from './api';
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -19,7 +20,7 @@ const AdminDashboard = () => {
     const token = localStorage.getItem("token");
 
     // Verificar productos con stock agotado
-    fetch("http://localhost:5000/admin/alertas-stock", {
+    api.get("/admin/alertas-stock", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

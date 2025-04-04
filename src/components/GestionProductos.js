@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/GestionProductos.css";
 import Swal from "sweetalert2";
+import api from './api';
 
 const GestionProductos = () => {
   const [productos, setProductos] = useState([]);
@@ -21,7 +22,7 @@ const GestionProductos = () => {
 
   const fetchProductos = async () => {
     try {
-      const res = await fetch("http://localhost:5000/admin/productos", {
+      const res = await api.get("/admin/productos", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -162,7 +163,7 @@ const GestionProductos = () => {
     formDataFile.append("imagen", file);
 
     try {
-      const res = await fetch("http://localhost:5000/admin/upload", {
+      const res = await api.get("/admin/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
