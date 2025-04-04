@@ -785,28 +785,27 @@ app.get('/api/url', (req, res) => {
   });
 
   app.post("/admin/registrar", verifyToken, async (req, res) => {
-      const { nombre, correo, contraseña } = req.body;
-    
-      try {
-        const [existe] = await db.query("SELECT * FROM usuarios WHERE email = ?", [correo]);
-        if (existe.length > 0) {
-          return res.status(400).json({ error: "El correo ya está registrado." });
-        }
-    
-        const hashed = await bcrypt.hash(contraseña, 10);
-    
-        await db.query(
-          `INSERT INTO usuarios (nombre, email, password, tipo_usuario) VALUES (?, ?, ?, 1)`,
-          [nombre, correo, hashed]
-        );
-    
-        res.json({ message: "✅ Admin registrado correctamente." });
-    
-      } catch (error) {
-        console.error("❌ Error al registrar admin:", error);
-        res.status(500).json({ error: "Error en el servidor." });
-      }
-  });
+  const { nombre, correo, contraseña } = req.body;
+
+  try {
+    const [existe] = await db.query("SELECT * FROM usuarios WHERE email = ?", [correo]);
+
+    if (existe.length > 0) {
+      return res.status(400).json({ error: "El correo ya está registrado." });
+    }
+
+    const hashed = await bcrypt.hash(contraseña, 10);
+
+    await db.query(`
+      INSERT INTO usuarios (nombre, email, password, tipo_usuario) VALUES (?, ?, ?, 1)
+    `, [nombre, correo, hashed]);
+
+    res.json({ message: "✅ Admin registrado correctamente." });
+  } catch (error) {
+    console.error("❌ Error al registrar admin:", error);  // Improved logging
+    res.status(500).json({ error: "Error en el servidor." });
+  }
+});
 
   app.get("/admin/reportes-detallados", verifyToken, async (req, res) => {
     try {
