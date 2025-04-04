@@ -11,40 +11,21 @@ const getBackendUrl = async () => {
   }
 };
 
-// Crear un objeto api que usará la URL obtenida dinámicamente
 const api = {
   get: async (endpoint, options = {}) => {
-    const baseURL = await getBackendUrl(); // Obtener la URL dinámica del backend
+    const baseURL = await getBackendUrl();
     if (baseURL) {
       return fetch(`${baseURL}${endpoint}`, { ...options, method: "GET" });
     } else {
       console.error("Base URL no disponible");
     }
   },
-
   post: async (endpoint, data, options = {}) => {
     const baseURL = await getBackendUrl();
     if (baseURL) {
       return fetch(`${baseURL}${endpoint}`, {
         ...options,
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(options.headers || {}),
-        },
-        body: JSON.stringify(data),
-      });
-    } else {
-      console.error("Base URL no disponible");
-    }
-  },
-
-  put: async (endpoint, data, options = {}) => {
-    const baseURL = await getBackendUrl();
-    if (baseURL) {
-      return fetch(`${baseURL}${endpoint}`, {
-        ...options,
-        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           ...(options.headers || {}),
