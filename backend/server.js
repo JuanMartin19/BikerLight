@@ -9,84 +9,55 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 
 const app = express();
-app.use(cors({
-  origin: [
-    "https://mi-backend-se76.onrender.com",
-    "https://frontend-nine-dusky-89.vercel.app"
-  ],
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
-// Conexión a la base de datos
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+// 🔹 Middleware para verificar autenticación con JWT (ANTES del require)
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (!token) return res.status(401).json({ error: "Acceso denegado. No hay token." });
 
-function verifyToken(req, res, next) {
-  const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-
-  if (!token) {
-    return res.status(403).json({ error: "Token requerido" });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ error: "Token inválido" });
-    }
-    req.userId = decoded.userId; // Adjuntamos el userId al request
+  jwt.verify(token.split(' ')[1], process.env.JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ error: "Token inválido o expirado." });
+    req.userId = decoded.userId;
     next();
   });
-}
+};
 
-// Prueba de conexión a la base de datos
-db.getConnection()
-  .then(() => {
-    console.log("✅ Conectado a la base de datos");
-    const PORT = process.env.PORT || 3000;
-    console.log("🛠️ Puerto asignado por Render:", PORT);
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ Error al conectar con la base de datos:", err);
-  });
-
+// 👇 Exportamos verifyToken para usar en admin.js sin que dé undefined
 module.exports.verifyToken = verifyToken;
 
 // 🔹 Importar rutas (ya funciona porque verifyToken ya está definido)
-const adminRoutes = require('./routes/admin');
-app.use('/admin', adminRoutes);
+const adminRoutes = require("./routes/admin");
+app.use("/", adminRoutes);
 
-// Middleware para servir archivos estáticos desde /uploads
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+  // 🔹 Conectar a MySQL con promesas
+  const db = mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+  });
 
-// Configuración de almacenamiento con multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads"); // 👈 Carpeta donde se guardarán
-  },
-  filename: (req, file, cb) => {
-    const nombreFinal = Date.now() + "-" + file.originalname;
-    cb(null, nombreFinal);
-  }
-});
+  // Middleware para servir archivos estáticos desde /uploads
+  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-const upload = multer({ storage });
+  // Configuración de almacenamiento con multer
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "uploads"); // 👈 Carpeta donde se guardarán
+    },
+    filename: (req, file, cb) => {
+      const nombreFinal = Date.now() + "-" + file.originalname;
+      cb(null, nombreFinal);
+    }
+  });
 
-// Endpoint para enviar la URL del backend
-app.get('/api/url', (req, res) => {
-  res.json({ apiUrl: 'https://mi-backend-se76.onrender.com' });
-});
-
+  const upload = multer({ storage });
 
   // Registro manual de usuarios normales
   app.post("/register", async (req, res) => {
@@ -244,13 +215,13 @@ app.get('/api/url', (req, res) => {
 
   // 🔹 CERRAR SESIÓN
   app.post('/logout', verifyToken, async (req, res) => {
-    try {
-      await db.query('UPDATE usuarios SET session_token = NULL WHERE id_usuario = ?', [req.userId]);
-      res.json({ message: "Sesión cerrada exitosamente." });
-    } catch (error) {
-      console.error("❌ Error en logout:", error);
-      res.status(500).json({ error: "Error en el servidor." });
-    }
+      try {
+          await db.query('UPDATE usuarios SET session_token = NULL WHERE id_usuario = ?', [req.userId]);
+          res.json({ message: "Sesión cerrada exitosamente." });
+      } catch (error) {
+          console.error("❌ Error en logout:", error);
+          res.status(500).json({ error: "Error en el servidor." });
+      }
   });
 
   // 🔹 Ruta perfil extendida
@@ -785,27 +756,28 @@ app.get('/api/url', (req, res) => {
   });
 
   app.post("/admin/registrar", verifyToken, async (req, res) => {
-  const { nombre, correo, contraseña } = req.body;
-
-  try {
-    const [existe] = await db.query("SELECT * FROM usuarios WHERE email = ?", [correo]);
-
-    if (existe.length > 0) {
-      return res.status(400).json({ error: "El correo ya está registrado." });
-    }
-
-    const hashed = await bcrypt.hash(contraseña, 10);
-
-    await db.query(`
-      INSERT INTO usuarios (nombre, email, password, tipo_usuario) VALUES (?, ?, ?, 1)
-    `, [nombre, correo, hashed]);
-
-    res.json({ message: "✅ Admin registrado correctamente." });
-  } catch (error) {
-    console.error("❌ Error al registrar admin:", error);  // Improved logging
-    res.status(500).json({ error: "Error en el servidor." });
-  }
-});
+      const { nombre, correo, contraseña } = req.body;
+    
+      try {
+        const [existe] = await db.query("SELECT * FROM usuarios WHERE email = ?", [correo]);
+        if (existe.length > 0) {
+          return res.status(400).json({ error: "El correo ya está registrado." });
+        }
+    
+        const hashed = await bcrypt.hash(contraseña, 10);
+    
+        await db.query(
+          `INSERT INTO usuarios (nombre, email, password, tipo_usuario) VALUES (?, ?, ?, 1)`,
+          [nombre, correo, hashed]
+        );
+    
+        res.json({ message: "✅ Admin registrado correctamente." });
+    
+      } catch (error) {
+        console.error("❌ Error al registrar admin:", error);
+        res.status(500).json({ error: "Error en el servidor." });
+      }
+  });
 
   app.get("/admin/reportes-detallados", verifyToken, async (req, res) => {
     try {
@@ -922,7 +894,7 @@ app.get('/api/url', (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No se subió ninguna imagen." });
     }
-  
+
     // Devuelve solo la ruta para guardar en la BD
     const ruta = `/uploads/${req.file.filename}`;
     res.json({ url: ruta });
@@ -1018,4 +990,10 @@ app.get('/api/url', (req, res) => {
       console.error("❌ Error al verificar suscripción:", error);
       res.status(500).json({ error: "Error del servidor al verificar la suscripción" });
     }
+  });
+
+  // 🔹 Iniciar el servidor
+  const PORT = 5000;
+  app.listen(PORT, () => {
+      console.log(`🚀 Servidor corriendo en https://mi-backend-se76.onrender.com:${PORT}`);
   });
